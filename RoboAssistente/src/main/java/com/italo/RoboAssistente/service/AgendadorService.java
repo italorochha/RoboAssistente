@@ -23,7 +23,7 @@ public class AgendadorService {
         this.fundoRepository = fundoRepository;
         this.criptoService = criptoService;
     }
-    @Scheduled(cron = "0 0/30 * * * *") // Executa todo dia às 9h
+    @Scheduled(cron = "0 0/30 * * * MON-FRI") // Executa todo dia às 9h
     public void rotinaDeRelatorioFIIs() {
         logger.info("Iniciando varredura na B3 e nas Corretoras Cripto...");
         try {
