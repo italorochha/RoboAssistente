@@ -5,7 +5,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Estágio 2: Run (Cria uma imagem super leve só com o Java para rodar o robô 24h)
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 # Copia o arquivo .jar compilado do Estágio 1
 COPY --from=build /app/target/*.jar app.jar
