@@ -17,11 +17,13 @@ public class AgendadorService {
     private final TelegramService telegramService;
     private final FundoRepository fundoRepository;
     private final CriptoService criptoService;
-    public AgendadorService(B3Service b3Service, TelegramService telegramService, FundoRepository fundoRepository, CriptoService criptoService) {
+    private final IaService iaService;
+    public AgendadorService(B3Service b3Service, TelegramService telegramService, FundoRepository fundoRepository, CriptoService criptoService, IaService iaService) {
         this.b3Service = b3Service;
         this.telegramService = telegramService;
         this.fundoRepository = fundoRepository;
         this.criptoService = criptoService;
+        this.iaService = iaService;
     }
     @Scheduled(cron = "0 0/30 * * * MON-FRI")
     public void rotinaDeRelatorioFIIs() {
@@ -40,6 +42,13 @@ String relatorioCripto = criptoService.buscarOportunidadeArbitragem();
             } else {
                 logger.info("Cripto: O spread atual não cobre as taxas. Mantendo silêncio.");
             }
+    String manchetesDoDia = "Ibovespa bate recorde histórico. Dólar cai com inflação nos EUA. Bitcoin em forte alta.";
+    String analiseIA = iaService.analisarSentimento(manchetesDoDia);
+    String mensagemFinal = " *Visão de Mercado (IA):*\n"
+    + analiseIA + "\n\n"
+    + " *Cotações de Hoje:*\n"
+    + relatorioCripto;
+    telegramService.enviarMensagem(mensagemFinal);
         } catch (Exception e) {
             logger.error("Falha critica ao executar a rotina de relatorio: {}", e.getMessage());
         }
