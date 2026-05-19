@@ -18,12 +18,14 @@ public class AgendadorService {
     private final FundoRepository fundoRepository;
     private final CriptoService criptoService;
     private final IaService iaService;
-    public AgendadorService(B3Service b3Service, TelegramService telegramService, FundoRepository fundoRepository, CriptoService criptoService, IaService iaService) {
+    private final NoticiasService noticiasService;
+    public AgendadorService(B3Service b3Service, TelegramService telegramService, FundoRepository fundoRepository, CriptoService criptoService, IaService iaService, NoticiasService noticiasService) {
         this.b3Service = b3Service;
         this.telegramService = telegramService;
         this.fundoRepository = fundoRepository;
         this.criptoService = criptoService;
         this.iaService = iaService;
+        this.noticiasService = noticiasService;
     }
     @Scheduled(cron = "0 0/30 * * * MON-FRI")
     public void rotinaDeRelatorioFIIs() {
@@ -42,7 +44,7 @@ String relatorioCripto = criptoService.buscarOportunidadeArbitragem();
             } else {
                 logger.info("Cripto: O spread atual não cobre as taxas. Mantendo silêncio.");
             }
-    String manchetesDoDia = "Ibovespa bate recorde histórico. Dólar cai com inflação nos EUA. Bitcoin em forte alta.";
+    String manchetesDoDia = noticiasService.buscarManchetesDoDia();
     String analiseIA = iaService.analisarSentimento(manchetesDoDia);
     String mensagemFinal = " *Visão de Mercado (IA):*\n"
     + analiseIA + "\n\n"
