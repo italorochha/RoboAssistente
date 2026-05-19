@@ -16,14 +16,14 @@ public class AgendadorService {
     private final B3Service b3Service;
     private final TelegramService telegramService;
     private final FundoRepository fundoRepository;
-    private final CriptoService criptoService; // <-- 1. Adicionamos o serviço aqui
+    private final CriptoService criptoService;
     public AgendadorService(B3Service b3Service, TelegramService telegramService, FundoRepository fundoRepository, CriptoService criptoService) {
         this.b3Service = b3Service;
         this.telegramService = telegramService;
         this.fundoRepository = fundoRepository;
         this.criptoService = criptoService;
     }
-    @Scheduled(cron = "0 0/30 * * * MON-FRI") // Executa todo dia às 9h
+    @Scheduled(cron = "0 0/30 * * * MON-FRI")
     public void rotinaDeRelatorioFIIs() {
         logger.info("Iniciando varredura na B3 e nas Corretoras Cripto...");
         try {
