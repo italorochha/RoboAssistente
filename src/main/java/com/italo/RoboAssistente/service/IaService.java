@@ -9,15 +9,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class IaService {
-
     @Value("${gemini.api.key}")
     private String geminiApiKey;
-
     @Value("${gemini.api.url}")
     private String geminiApiUrl;
-
     public String analisarSentimento(String manchetes) {
         String urlCompleta = geminiApiUrl + geminiApiKey;
         String prompt = "Atue como um analista financeiro sênior. Leia as seguintes manchetes do dia e forneça um resumo de no máximo 3 linhas dizendo se o sentimento do mercado é de Otimismo, Pessimismo ou Neutro. Seja direto ao ponto. Manchetes: " + manchetes;
@@ -29,8 +30,14 @@ public class IaService {
         RestTemplate restTemplate = new RestTemplate();
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(urlCompleta, requestEntity, String.class);
-            return response.getBody();
-        } catch (RestClientException e) {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(response.getBody());
+            String textoLimpo = rootNode.path("candidates").get(0)
+                                        .path("content")
+                                        .path("parts").get(0)
+                                        .path("text").asText();
+            return textoLimpo;
+        } catch (JsonProcessingException | RestClientException e) {
             System.err.println("Erro ao conectar com a IA: " + e.getMessage());
             return "Erro ao analisar o sentimento do mercado hoje.";
         }
