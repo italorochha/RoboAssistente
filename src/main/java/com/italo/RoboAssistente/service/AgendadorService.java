@@ -19,15 +19,17 @@ public class AgendadorService {
     private final CriptoService criptoService;
     private final IaService iaService;
     private final NoticiasService noticiasService;
-    public AgendadorService(B3Service b3Service, TelegramService telegramService, FundoRepository fundoRepository, CriptoService criptoService, IaService iaService, NoticiasService noticiasService) {
+    private final TesouroDiretoService tesouroDiretoService;
+    public AgendadorService(B3Service b3Service, TelegramService telegramService, FundoRepository fundoRepository, CriptoService criptoService, IaService iaService, NoticiasService noticiasService, TesouroDiretoService tesouroDiretoService) {
         this.b3Service = b3Service;
         this.telegramService = telegramService;
         this.fundoRepository = fundoRepository;
         this.criptoService = criptoService;
         this.iaService = iaService;
         this.noticiasService = noticiasService;
+        this.tesouroDiretoService = tesouroDiretoService;
     }
-    @Scheduled(cron = "0 0/30 * * * MON-FRI")
+    @Scheduled(cron = "0 0/30 10-17 * * *", zone = "America/Sao_Paulo")
     public void rotinaDeRelatorioFIIs() {
         logger.info("Iniciando varredura na B3 e nas Corretoras Cripto...");
         try {
@@ -46,10 +48,13 @@ String relatorioCripto = criptoService.buscarOportunidadeArbitragem();
             }
     String manchetesDoDia = noticiasService.buscarManchetesDoDia();
     String analiseIA = iaService.analisarSentimento(manchetesDoDia);
-    String mensagemFinal = " *Visão de Mercado (IA):*\n"
+    String alertaTesouro = tesouroDiretoService.verificarCurvaDeJuros();
+    String mensagemFinal = alertaTesouro + "\n\n"
+    + " *Visão de Mercado (IA):*\n"
     + analiseIA + "\n\n"
     + " *Cotações de Hoje:*\n"
     + relatorioCripto;
+
     telegramService.enviarMensagem(mensagemFinal);
         } catch (Exception e) {
             logger.error("Falha critica ao executar a rotina de relatorio: {}", e.getMessage());
